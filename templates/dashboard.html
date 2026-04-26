@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Cloud Photo Backup{% endblock %}
+
+{% block content %}
+<div class="container dashboard-container">
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+        <h1>Welcome back, <span class="username-highlight">{{ username }}</span>!</h1>
+        <p>Here's a quick overview of your cloud storage</p>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon photos">
+                <i class="fas fa-images"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Total Photos</h3>
+                <p class="stat-value">{{ total_photos }}</p>
+                <small>Files stored</small>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon storage">
+                <i class="fas fa-database"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Storage Used</h3>
+                <p class="stat-value">{{ storage_used }} MB</p>
+                <small>of 1 GB allowed</small>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon cloud">
+                <i class="fas fa-cloud"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Cloud Status</h3>
+                <p class="stat-value">Online</p>
+                <small>Sync active</small>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <h2>Quick Actions</h2>
+        <div class="action-buttons">
+            <a href="{{ url_for('upload') }}" class="action-btn">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <span>Upload Photos</span>
+            </a>
+            <a href="{{ url_for('gallery') }}" class="action-btn">
+                <i class="fas fa-images"></i>
+                <span>View Gallery</span>
+            </a>
+            <a href="{{ url_for('logout') }}" class="action-btn logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Recent Photos -->
+    {% if recent_photos %}
+    <div class="recent-section">
+        <h2>Recently Uploaded</h2>
+        <div class="photo-grid">
+            {% for photo in recent_photos %}
+            <div class="photo-card">
+                <div class="photo-image-wrapper">
+                    {% if photo.filename.lower().endswith(('.jpg', '.jpeg', '.png')) %}
+                        <img src="{{ url_for('download', filename=photo.filename) }}" 
+                             alt="{{ photo.original_filename }}"
+                             loading="lazy">
+                    {% endif %}
+                </div>
+                <div class="photo-info">
+                    <p class="photo-name" title="{{ photo.original_filename }}">
+                        {{ photo.original_filename[:20] }}{{ '...' if photo.original_filename|length > 20 else '' }}
+                    </p>
+                    <small>{{ photo.upload_date[:10] }}</small>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="view-all-link">
+            <a href="{{ url_for('gallery') }}">View All Photos →</a>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="fas fa-image"></i>
+        </div>
+        <h2>No photos yet</h2>
+        <p>Start by uploading your first photo</p>
+        <a href="{{ url_for('upload') }}" class="btn btn-primary">
+            <i class="fas fa-cloud-upload-alt"></i> Upload Your First Photo
+        </a>
+    </div>
+    {% endif %}
+    
+    <!-- Features Info -->
+    <div class="features-info">
+        <h2>Why Cloud Photo Backup?</h2>
+        <div class="features-grid">
+            <div class="feature">
+                <i class="fas fa-lock"></i>
+                <h3>Secure Storage</h3>
+                <p>Your photos are encrypted and securely stored in the cloud</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-sync"></i>
+                <h3>Auto Sync</h3>
+                <p>Access your photos from anywhere, anytime</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-share-alt"></i>
+                <h3>Easy Sharing</h3>
+                <p>Download and manage your photos with ease</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-mobile-alt"></i>
+                <h3>Mobile Ready</h3>
+                <p>Works perfectly on mobile and desktop devices</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

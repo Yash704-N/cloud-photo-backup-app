@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Photos - Cloud Photo Backup{% endblock %}
+
+{% block content %}
+<div class="container upload-container">
+    <!-- Header -->
+    <div class="upload-header">
+        <h1>Upload Your Photos</h1>
+        <p>Select photos from your device to upload to the cloud</p>
+    </div>
+    
+    <!-- Upload Area -->
+    <div class="upload-area">
+        <div class="upload-zone" id="uploadZone">
+            <div class="upload-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+            </div>
+            <h2>Drag and drop your photos here</h2>
+            <p>or click to browse your device</p>
+            <input 
+                type="file" 
+                id="fileInput" 
+                accept=".jpg,.jpeg,.png"
+                multiple
+                hidden
+            >
+            <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                <i class="fas fa-folder-open"></i> Choose Files
+            </button>
+        </div>
+    </div>
+    
+    <!-- File Requirements -->
+    <div class="requirements">
+        <h3>File Requirements</h3>
+        <ul>
+            <li><i class="fas fa-check"></i> <strong>Formats:</strong> JPG, JPEG, PNG</li>
+            <li><i class="fas fa-check"></i> <strong>Max Size:</strong> 10 MB per file</li>
+            <li><i class="fas fa-check"></i> <strong>Multiple Files:</strong> Upload multiple at once</li>
+            <li><i class="fas fa-check"></i> <strong>Secure:</strong> All files are encrypted</li>
+        </ul>
+    </div>
+    
+    <!-- Upload Progress -->
+    <div id="uploadProgress" class="upload-progress" style="display: none;">
+        <h3>Upload Progress</h3>
+        <div id="uploadList" class="upload-list">
+            <!-- Files will be added here -->
+        </div>
+    </div>
+    
+    <!-- Uploaded Files Summary -->
+    <div id="uploadSummary" class="upload-summary" style="display: none;">
+        <div class="summary-content">
+            <div class="summary-icon success">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2>Upload Complete!</h2>
+            <p id="summaryText"></p>
+            <div class="summary-actions">
+                <a href="{{ url_for('gallery') }}" class="btn btn-primary">
+                    <i class="fas fa-images"></i> View Gallery
+                </a>
+                <button class="btn btn-secondary" onclick="resetUpload()">
+                    <i class="fas fa-cloud-upload-alt"></i> Upload More
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tips Section -->
+    <div class="tips-section">
+        <h3>Upload Tips</h3>
+        <div class="tips-grid">
+            <div class="tip">
+                <i class="fas fa-lightbulb"></i>
+                <h4>Optimize Your Photos</h4>
+                <p>Compress images before uploading for faster transfers</p>
+            </div>
+            <div class="tip">
+                <i class="fas fa-lock"></i>
+                <h4>Privacy Guaranteed</h4>
+                <p>Your photos are private and only accessible to you</p>
+            </div>
+            <div class="tip">
+                <i class="fas fa-sync"></i>
+                <h4>Auto-organized</h4>
+                <p>Photos are automatically organized by upload date</p>
+            </div>
+            <div class="tip">
+                <i class="fas fa-download"></i>
+                <h4>Download Anytime</h4>
+                <p>Download your photos in original quality whenever you need</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput');
+const uploadProgress = document.getElementById('uploadProgress');
+const uploadList = document.getElementById('uploadList');
+const uploadSummary = document.getElementById('uploadSummary');
+
+let uploadCount = 0;
+let successCount = 0;
+
+// Drag and drop
+uploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadZone.classList.add('dragover');
+});
+
+uploadZone.addEventListener('dragleave', () => {
+    uploadZone.classList.remove('dragover');
+});
+
+uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    handleFiles(files);
+});
+
+// File input change
+fileInput.addEventListener('change', (e) => {
+    handleFiles(e.target.files);
+});
+
+function handleFiles(files) {
+    if (files.length === 0) return;
+    
+    // Validate files
+    let validFiles = [];
+    for (let file of files) {
+        if (!isValidFile(file)) {
+            showNotification(`${file.name} is not a valid photo file`, 'error');
+            continue;
+        }
+        validFiles.push(file);
+    }
+    
+    if (validFiles.length === 0) return;
+    
+    // Show progress section
+    uploadProgress.style.display = 'block';
+    uploadList.innerHTML = '';
+    uploadCount = validFiles.length;
+    successCount = 0;
+    
+    // Upload each file
+    validFiles.forEach(file => {
+        uploadFile(file);
+    });
+}
+
+function isValidFile(file) {
+    const allowedTypes = ['image/jpeg', 'image/png'];
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    
+    if (!allowedTypes.includes(file.type)) {
+        return false;
+    }
+    
+    if (file.size > maxSize) {
+        showNotification(`${file.name} exceeds 10MB limit`, 'error');
+        return false;
+    }
+    
+    return true;
+}
+
+function uploadFile(file) {
+    // create a safe id (alphanumeric + hyphen) to avoid '.' interfering with CSS selectors
+    const fileId = 'file-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+    
+    const fileItem = document.createElement('div');
+    fileItem.className = 'upload-item';
+    fileItem.id = fileId;
+    fileItem.innerHTML = `
+        <div class="file-info">
+            <i class="fas fa-image"></i>
+            <span class="file-name">${file.name}</span>
+        </div>
+        <div class="file-progress">
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 0%"></div>
+            </div>
+            <span class="progress-text">0%</span>
+        </div>
+    `;
+    uploadList.appendChild(fileItem);
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const xhr = new XMLHttpRequest();
+    
+    xhr.upload.addEventListener('progress', (e) => {
+        if (e.lengthComputable) {
+            const percentComplete = (e.loaded / e.total) * 100;
+            const progressFill = document.querySelector('#' + fileId + ' .progress-fill');
+            const progressText = document.querySelector('#' + fileId + ' .progress-text');
+            if (progressFill) progressFill.style.width = percentComplete + '%';
+            if (progressText) progressText.textContent = Math.round(percentComplete) + '%';
+        }
+    });
+    
+    xhr.addEventListener('load', () => {
+        if (xhr.status === 200) {
+            const response = JSON.parse(xhr.responseText);
+            if (response.success) {
+                successCount++;
+                document.querySelector(`#${fileId}`).classList.add('success');
+                showNotification(`${file.name} uploaded successfully`, 'success');
+            } else {
+                document.querySelector(`#${fileId}`).classList.add('error');
+                showNotification(response.message || 'Upload failed', 'error');
+            }
+        } else {
+            document.querySelector(`#${fileId}`).classList.add('error');
+            showNotification('Upload failed', 'error');
+        }
+        
+        // Check if all uploads are done
+        if (document.querySelectorAll('.upload-item.success, .upload-item.error').length === uploadCount) {
+            showUploadSummary();
+        }
+    });
+    
+    xhr.addEventListener('error', () => {
+        document.querySelector(`#${fileId}`).classList.add('error');
+        showNotification('Upload error', 'error');
+        if (document.querySelectorAll('.upload-item.success, .upload-item.error').length === uploadCount) {
+            showUploadSummary();
+        }
+    });
+    
+    xhr.open('POST', '{{ url_for("upload") }}');
+    xhr.send(formData);
+}
+
+function showUploadSummary() {
+    setTimeout(() => {
+        uploadProgress.style.display = 'none';
+        uploadSummary.style.display = 'block';
+        document.getElementById('summaryText').textContent = 
+            `${successCount} of ${uploadCount} photos uploaded successfully`;
+    }, 500);
+}
+
+function resetUpload() {
+    uploadSummary.style.display = 'none';
+    uploadProgress.style.display = 'none';
+    uploadList.innerHTML = '';
+    fileInput.value = '';
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+        ${message}
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+</script>
+{% endblock %}

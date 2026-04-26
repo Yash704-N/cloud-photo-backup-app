@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Cloud Photo Backup{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <i class="fas fa-cloud"></i>
+            <h1>Cloud Photo Backup</h1>
+            <p>Secure Cloud Storage for Your Photos</p>
+        </div>
+        
+        <div class="auth-body">
+            <h2>Login to Your Account</h2>
+            
+            {% if request.args.get('success') %}
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                {{ request.args.get('success') }}
+            </div>
+            {% endif %}
+            
+            {% if error %}
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ error }}
+            </div>
+            {% endif %}
+            
+            <form method="POST" class="auth-form">
+                <div class="form-group">
+                    <label for="username">
+                        <i class="fas fa-user"></i> Username
+                    </label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        placeholder="Enter your username"
+                        required
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">
+                        <i class="fas fa-lock"></i> Password
+                    </label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        placeholder="Enter your password"
+                        required
+                    >
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </form>
+            
+            <div class="auth-footer">
+                <p>Don't have an account? 
+                    <a href="{{ url_for('register') }}">Register here</a>
+                </p>
+            </div>
+        </div>
+        
+        <div class="auth-features">
+            <h3>Why Choose Us?</h3>
+            <ul>
+                <li><i class="fas fa-shield-alt"></i> Secure & Encrypted</li>
+                <li><i class="fas fa-infinity"></i> Unlimited Photos</li>
+                <li><i class="fas fa-share-alt"></i> Easy Sharing</li>
+                <li><i class="fas fa-mobile-alt"></i> Mobile Friendly</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="auth-background">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+</div>
+{% endblock %}
