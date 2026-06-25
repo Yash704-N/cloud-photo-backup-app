@@ -367,7 +367,15 @@ def download(filename):
     if not os.path.isfile(filepath):
         return "Image not found", 404
 
-    return send_file(filepath)
+    from mimetypes import guess_type
+
+    mime_type, _ = guess_type(filepath)
+
+    return send_file(
+    os.path.abspath(filepath),
+    mimetype=mime_type or "application/octet-stream",
+    as_attachment=False
+)
 @app.route('/delete/<filename>', methods=['POST'])
 @login_required
 def delete(filename):
