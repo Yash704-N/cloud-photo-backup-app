@@ -337,35 +337,32 @@ def upload():
 @app.route('/download/<filename>')
 @login_required
 def download(filename):
-    """Download photo route"""
+    """Serve image for viewing and downloading"""
     user_id = session['user_id']
-    
-    # Verify that the file belongs to the user
+
     conn = get_db_connection()
     c = conn.cursor()
-    
+
     photo = c.execute(
         'SELECT * FROM photos WHERE user_id = ? AND filename = ?',
         (user_id, filename)
     ).fetchone()
+
     conn.close()
-    
+
     if photo is None:
-        return 'File not found or you do not have permission to download', 404
-    
+        return "File not found", 404
+
     user_folder = get_user_upload_folder(user_id)
     filepath = os.path.join(user_folder, filename)
-    
-    if not os.path.exists(filepath):
-        return 'File not found', 404
-    
-    return send_file(
-        filepath,
-        as_attachment=True,
-        download_name=photo['original_filename']
-    )
 
+    print("Looking for:", filepath)
+    print("Exists:", os.path.isfile(filepath))
 
+    if not os.path.isfile(filepath):
+        return "Image not found", 404
+
+    return send_file(filepath)
 @app.route('/delete/<filename>', methods=['POST'])
 @login_required
 def delete(filename):
