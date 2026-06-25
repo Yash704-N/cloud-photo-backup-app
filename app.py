@@ -301,19 +301,24 @@ def upload():
         
         # Create user folder and save file
         user_folder = get_user_upload_folder(user_id)
+
+        print("USER ID:", user_id)
+        print("USER FOLDER:", user_folder)
+        print("FOLDER EXISTS:", os.path.exists(user_folder)) 
+
         secure_name = secure_filename(file.filename)
-        
-        # Add timestamp to make filename unique
+
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
         filename = timestamp + secure_name
-        
+
         filepath = os.path.join(user_folder, filename)
-        print("Saving file to:", filepath)
-      
+
+        print("FILEPATH:", filepath)
         
-        # Save file and database in optimized way
         try:
             file.save(filepath)
+
+            print("SAVED:", os.path.exists(filepath))
             print("File exists after save:", os.path.exists(filepath))
             
             # Save metadata to database
