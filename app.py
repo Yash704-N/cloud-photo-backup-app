@@ -308,10 +308,13 @@ def upload():
         filename = timestamp + secure_name
         
         filepath = os.path.join(user_folder, filename)
+        print("Saving file to:", filepath)
+      
         
         # Save file and database in optimized way
         try:
             file.save(filepath)
+            print("File exists after save:", os.path.exists(filepath))
             
             # Save metadata to database
             conn = get_db_connection()
