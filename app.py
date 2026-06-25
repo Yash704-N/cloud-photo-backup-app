@@ -14,6 +14,11 @@ from datetime import datetime
 from functools import wraps
 import json
 
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE = os.path.join(BASE_DIR, "database.db")
+
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-change-in-production'
@@ -34,7 +39,7 @@ app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
 
 def get_db_connection():
     """Create database connection"""
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     return conn
 
